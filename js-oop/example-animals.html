@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Наследование</title>
+    <script type="text/javascript">
+        // Любая функция, кроме некоторых встроенных, может создать объект.
+        // НАСЛЕДОВАНИЕ реализуется через неявную(внутреннюю) ССЫЛКУ одного объекта на другой,
+        // который называется его прототипом и в спецификации обозначается [[prototype]].
+        // Также существует свойство с похожим названием prototype (без квадратных скобок)
+        // - оно вспомогательное и указывает, откуда брать прототип при создании объекта.
+        // Когда вы ставите функции Animal свойство Animal.prototype = XXX - вы этим декларируете:
+        // "все новые объекты класса Animal будут иметь прототип XXX".
+
+        // [[prototype]] - свойство, которое хранит ссылку на прототип(другой объект). Не доступно для чтения и изменения.
+        // Но в Gecko-браузерах: Firefox/Mozilla и т.п., эта ссылка является обычным свойством объекта: __proto__.
+        // В этих браузерах ее можно читать и изменять.
+        // Единственный кроссбраузерный способ указать прототип - это использовать свойство prototype функции-конструктора.
+
+        // prototype - свойство указывает, откуда брать прототип при создании объекта.
+
+        // Ссылка на прототип создается оператором new во время создания объекта.
+        // Ее значением становится свойство prototype функции-конструктора. Значение prototype указывает, от кого будут наследовать новые объекты
+        // Прототип работает как резервное хранилище свойств. Если свойства нет у объекта - оно ищется в его прототипе. Получается наследование.
+
+        function Animal(name) {
+            this.name = name
+            this.canWalk = true
+        }
+
+        var animal = new Animal("скотинка");
+        console.log(animal.name);
+        console.log(animal instanceof Animal)  // => true
+        console.log(animal);
+        console.log(animal.name);
+
+        function Rabbit(name) {
+            this.name = name
+        }
+
+        // все объекты, созданные Rabbit
+        // будут иметь прототип (наследовать) animal
+        Rabbit.prototype = animal
+
+        big = new Rabbit('Chuk')
+        small = new Rabbit('Gek')
+
+        console.log(big.name)  // Chuk
+        console.log(small.name) // Gek
+        console.log(big.canWalk) // true
+
+        // в Firefox можно еще так
+        if (big.__proto__) {  // в Firefox __proto__ это [[Prototype]]
+            console.log(big.__proto__.name) // скотинка
+        }
+
+        // Изменения в прототипе отразятся на обоих объектах.
+        // поменяли в прототипе
+        animal.canWalk = false
+
+        console.log(big.canWalk)  // false
+        console.log(small.canWalk)  // false
+
+        // Перекрытие свойств родителя
+        animal.canWalk = false
+        small.canWalk = true
+
+        console.log(big.canWalk)  // false
+        console.log(small.canWalk)  // true
+
+
+        //Наверху цепочки всегда находится объект встроенного класса Object.
+        // Так получается из-за того, что по умолчанию свойство prototype функции равно пустому объекту new Object().
+        // Благодаря тому, что вверху цепочки наследования стоит Object,
+        // все остальные объекты имеют доступ к его методам(toString(), hasOwnProperty()...).
+
+        // Animal.prototype не указан явно, по умолчанию:
+        // Animal.prototype = {}
+
+
+        // Методы
+        Animal.prototype.move = function(n) {
+            this.distance = n
+            console.log('Move on ' + this.distance)
+        }
+
+        // Альтернативный подход заключается в добавлении методов объекту в его конструкторе.
+        //Объявление move в классе Animal при таком подходе выглядело бы вот так:
+        /*function Animal(n) {
+            .....
+            // добавляем методы
+            this.move = function(n) {
+                this.distance = n
+                alert(this.distance)
+            }
+        }*/
+
+        //В наиболее распространенных javascript-библиотеках используется первый подход, т.е добавление методов в прототип.
+
+        small.move(10);
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>

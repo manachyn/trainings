@@ -1,0 +1,100 @@
+<?php
+// define 'DataPrototype' class
+abstract class DataPrototype{
+    private $size;
+    private $data;
+    abstract public function __clone();
+    abstract public function getData();
+    abstract public function setData($data);
+    abstract public function getSize();
+}
+
+// define concrete 'ArrayPrototype' class
+class ArrayPrototype extends DataPrototype{
+    public function setData($data){
+        if(!is_array($data)){
+            throw new Exception('Input data must be an array.');
+        }
+        $this->data=$data;
+    }
+    public function getData(){
+        return $this->data;
+    }
+    public function getSize(){
+        if(!$size=count($this->data)){
+            throw new Exception('Error retrieving size of array');
+        }
+        return $size;
+    }
+    public function __clone(){}
+}
+
+// define concrete 'FilePrototype' class
+class FilePrototype extends DataPrototype{
+    private $file='default_file.txt';
+    public function setData($data){
+        if(!is_string($data)){
+            throw new Exception('Input data must be a string.');
+        }
+        $this->data=$data;
+        $this->save();
+    }
+    public function getData(){
+        return $this->data;
+    }
+    public function getSize(){
+        if(!$size=filesize($this->file)){
+            throw new Exception('Error retrieving size of destination file.');
+        }
+        return $size;
+    }
+    private function save(){
+        if(!$fp=fopen($this->file,'w')){
+            throw new Exception('Error opening destination file.');
+        }
+        if(!fwrite($fp,$this->data)){
+            throw new Exception('Error writing data to destination file.');
+        }
+        fclose($fp);
+    }
+    public function __clone(){}
+}
+
+try{
+    // create new 'ArrayPrototype' object
+    $arrayPrototype=new ArrayPrototype();
+    // clone 'ArrayPrototype' to create another object
+    $array1 = clone $arrayPrototype;
+    $array1->setData(array('This is element 1','This is element 2','This is element 3'));
+    echo 'Number of array elements is as following :'.$array1->getSize();
+
+   /*
+   displays the following
+   Number of array elements is as following :3
+   */
+
+   $array2= clone $arrayPrototype;
+   $array2->setData(array('This is element A','This is element B','This is element C','This is element D'));
+   echo 'Number of array elements is as following :'.$array2->getSize();
+
+   /*
+   displays the following
+   Number of array elements is as following :4
+   */
+
+   // create new 'FilePrototype' object
+   $filePrototype=new FilePrototype();
+   // clone 'FilePrototype' to create another object
+   $file1=clone $filePrototype;
+   $file1->setData('This string will be saved to file!');
+   echo 'Size in bytes of destination file is as following :'.$file1->getSize();
+
+   /*
+   displays the following
+   Size in bytes of destination file is as following :34
+   */
+}
+catch(Exception $e){
+    echo $e->getMessage();
+    exit();
+}
